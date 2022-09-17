@@ -1,4 +1,5 @@
 import json
+from mimetypes import init
 import os
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -7,14 +8,15 @@ import urllib
 import time
 import uuid
 
+
 class WaterScraper():
     def __init__(self):
         self.link_list = []
+
+    def geturl(self):
+        self.driver = webdriver.Chrome("C:\\Users\\awoye\\Downloads\\chromedriver_win32\\chromedriver.exe")
+        self.driver.get("https://www.waterstones.com/")
         
-    def open_waterstones(self):
-        url = "https://www.waterstones.com"
-        self.driver= webdriver.Chrome(executable_path="C:\\Users\\awoye\\Downloads\\chromedriver_win32\\chromedriver.exe")
-        self.driver.get("https://www.waterstones.com")
 
     def click_accept_cookies(self):
         time.sleep(8)
@@ -35,20 +37,31 @@ class WaterScraper():
         time.sleep(5)
             
     def scroll_down(self):
+        time.sleep(5)
         self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
 
     def extract_product_links(self):
+        time.sleep(5)
         container = self.driver.find_element(by = By.XPATH, value = '/html/body/div[1]/div[1]/div[3]/div[2]')
-        container = container.find_elements(by = By.CLASS_NAME, value = 'title-wrap')
+        link_container = container.find_elements(by = By.CLASS_NAME, value = 'title-wrap')
 
-
-        for book in container:
+        for book in link_container:
             book_link = book.find_element(by = By.TAG_NAME, value = 'a').get_attribute('href')
             self.link_list.append(book_link)
             
             
         print(self.link_list)
 
+
+runscraper = WaterScraper()
+
+if __name__ == '__main__':
+    runscraper.geturl()
+    runscraper.click_accept_cookies()
+    runscraper.nav_to_crime_books()
+    runscraper.scroll_down()
+    runscraper.scroll_up()
+    runscraper.extract_product_links()
 
 
 
