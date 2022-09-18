@@ -12,6 +12,7 @@ import uuid
 class WaterScraper():
     def __init__(self):
         self.link_list = []
+        self.product_list =[]
 
     def geturl(self):
         self.driver = webdriver.Chrome("C:\\Users\\awoye\\Downloads\\chromedriver_win32\\chromedriver.exe")
@@ -52,6 +53,29 @@ class WaterScraper():
             
         print(self.link_list)
 
+    def extract_and_load_dict(self):
+            for product in self.link_list[:3]:
+                self.driver.get(product)
+                book_title = self.driver.find_element(by = By.CLASS_NAME, value = 'book-title').text
+                author = self.driver.find_element(by = By.XPATH, value = '/html/body/div[1]/div[1]/div[2]/section[1]/div[2]/div[1]/span/a/b/span').text
+                price = float(self.driver.find_element(by = By.XPATH, value = '/html/body/div[1]/div[1]/div[2]/section[1]/div[2]/div[2]/div/div/div/div[1]/div/b[2]').text[1:])
+                pages = int(self.driver.find_element(by = By.XPATH, value = '/html/body/div[1]/div[1]/div[2]/section[1]/div[2]/div[2]/div/div/div/div[2]/span[2]/span').text )
+                ISBN = self.driver.find_element(by = By.XPATH, value = '/html/body/div[1]/div[1]/div[2]/section[2]/div[2]/div[1]/div[1]/p/i[2]/span').text 
+                product_img_link = self.driver.find_element(by = By.XPATH, value = '//*[@id="scope_book_image"]').get_attribute('src')
+            
+                product_details ={
+                'UUID': uuid.uuid4(),
+                'ISBN': ISBN,
+                'book_title':book_title,
+                'author':author,
+                'price': price,
+                'pages': pages,
+                'product_img_link':product_img_link
+                }
+                self.product_list.append(product_details)
+            print(self.product_list)
+
+
 
 runscraper = WaterScraper()
 
@@ -62,3 +86,4 @@ if __name__ == '__main__':
     runscraper.scroll_down()
     runscraper.scroll_up()
     runscraper.extract_product_links()
+    runscraper.extract_and_load_dict()
