@@ -82,6 +82,7 @@ class WaterScraper():
         print(self.product_list)
 
     def extract_img_and_dwnld(self):
+        '''Obtains image link and downloads image locally'''
         for product in self.link_list[:1]:
             self.driver.get(product)
             id = self.driver.find_element(by = By.XPATH, value = '/html/body/div[1]/div[1]/div[2]/section[2]/div[2]/div[1]/div[1]/p/i[2]/span').text
@@ -91,15 +92,19 @@ class WaterScraper():
         urllib.request.urlretrieve(image_url,filename)
                 
 
-    def load_data_to_json(self):   
+    def create_directory(self):
+        '''Creates directory'''
+        os.chdir("C:\\Users\\awoye\\OneDrive\\Documents\\GitHub\\data-collection-pipeline782")
+        os.mkdir('raw_data')
+
+    def load_data_to_json(self):
+        '''Saves dictionary of product text data as a json file'''   
         os.chdir('C:\\Users\\awoye\\OneDrive\\Documents\\GitHub\\data-collection-pipeline782\\raw_data')
         with open('data.json','w') as f:
             json.dump(self.product_list,f)
 
 
-    def create_directory(self):
-        os.chdir("C:\\Users\\awoye\\OneDrive\\Documents\\GitHub\\data-collection-pipeline782")
-        os.mkdir('raw_data')
+
 
 runscraper = WaterScraper()
 
