@@ -4,7 +4,7 @@ import os
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
-import urllib
+import urllib.request
 import time
 import uuid
 
@@ -64,7 +64,6 @@ class WaterScraper():
                 product_img_link = self.driver.find_element(by = By.XPATH, value = '//*[@id="scope_book_image"]').get_attribute('src')
             
                 product_details ={
-                'UUID': uuid.uuid4(),
                 'ISBN': ISBN,
                 'book_title':book_title,
                 'author':author,
@@ -75,6 +74,20 @@ class WaterScraper():
                 self.product_list.append(product_details)
             print(self.product_list)
 
+    def extract_img_and_dwnld(self):
+        for product in self.link_list[:1]:
+            self.driver.get(product)
+            id = self.driver.find_element(by = By.XPATH, value = '/html/body/div[1]/div[1]/div[2]/section[2]/div[2]/div[1]/div[1]/p/i[2]/span').text
+            img_link = self.driver.find_element(by = By.XPATH, value = '//*[@id="scope_book_image"]').get_attribute('src')
+            filename = id + '.jpg'
+            image_url = img_link
+        urllib.request.urlretrieve(image_url,filename)
+                
+
+    def load_data_to_json(self):   
+        os.chdir('C:\\Users\\awoye\\OneDrive\\Documents\\GitHub\\data-collection-pipeline782\\raw_data')
+        with open('data.json','w') as f:
+            json.dump(self.product_list,f)
 
 
 runscraper = WaterScraper()
@@ -83,7 +96,6 @@ if __name__ == '__main__':
     runscraper.geturl()
     runscraper.click_accept_cookies()
     runscraper.nav_to_crime_books()
-    runscraper.scroll_down()
-    runscraper.scroll_up()
     runscraper.extract_product_links()
     runscraper.extract_and_load_dict()
+    runscraper.load_data_to_json()

@@ -1,4 +1,5 @@
 import json
+from json import JSONEncoder
 from mimetypes import init
 import os
 from selenium import webdriver
@@ -6,7 +7,12 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 import urllib
 import time
-import uuid
+from uuid import UUID
+JSONEncoder_olddefault = JSONEncoder.default
+def JSONEncoder_newdefault(self, o):
+    if isinstance(o, UUID): return str(o)
+    return JSONEncoder_olddefault(self, o)
+JSONEncoder.default = JSONEncoder_newdefault
 
 
 class WaterScraper():
