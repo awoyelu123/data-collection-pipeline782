@@ -64,20 +64,14 @@ class WaterScraper():
         '''Extracts all relavent data and loads it into a dictionary'''
         for product in self.link_list[:9]:
             self.driver.get(product)
-            book_title = self.driver.find_element(by = By.CLASS_NAME, value = 'book-title').text
-            author = self.driver.find_element(by = By.XPATH, value = '/html/body/div[1]/div[1]/div[2]/section[1]/div[2]/div[1]/span/a/b/span').text
-            price = float(self.driver.find_element(by = By.XPATH, value = '/html/body/div[1]/div[1]/div[2]/section[1]/div[2]/div[2]/div/div/div/div[1]/div/b[2]').text[1:])
-            pages = int(self.driver.find_element(by = By.XPATH, value = '/html/body/div[1]/div[1]/div[2]/section[1]/div[2]/div[2]/div/div/div/div[2]/span[2]/span').text )
-            ISBN = self.driver.find_element(by = By.XPATH, value = '/html/body/div[1]/div[1]/div[2]/section[2]/div[2]/div[1]/div[1]/p/i[2]/span').text 
-            product_img_link = self.driver.find_element(by = By.XPATH, value = '//*[@id="scope_book_image"]').get_attribute('src')
         
             product_details ={
-            'ISBN': ISBN,
-            'book_title':book_title,
-            'author':author,
-            'price': price,
-            'pages': pages,
-            'product_img_link':product_img_link
+            'ISBN': self.driver.find_element(by = By.XPATH, value = '/html/body/div[1]/div[1]/div[2]/section[2]/div[2]/div[1]/div[1]/p/i[2]/span').text,
+            'book_title':self.driver.find_element(by = By.CLASS_NAME, value = 'book-title').text,
+            'author':self.driver.find_element(by = By.XPATH, value = '/html/body/div[1]/div[1]/div[2]/section[1]/div[2]/div[1]/span/a/b/span').text,
+            'price': float(self.driver.find_element(by = By.XPATH, value = '/html/body/div[1]/div[1]/div[2]/section[1]/div[2]/div[2]/div/div/div/div[1]/div/b[2]').text[1:]),
+            'pages': int(self.driver.find_element(by = By.XPATH, value = '/html/body/div[1]/div[1]/div[2]/section[1]/div[2]/div[2]/div/div/div/div[2]/span[2]/span').text),
+            'product_img_link':self.driver.find_element(by = By.XPATH, value = '//*[@id="scope_book_image"]').get_attribute('src')
             }
             self.product_list.append(product_details)
 
