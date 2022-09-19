@@ -1,6 +1,8 @@
+import boto3
+from botocore.client import Config
 import json
-from mimetypes import init
 import os
+import pandas as pd
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
@@ -46,7 +48,7 @@ class WaterScraper():
         time.sleep(5)
         self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
 
-    def creat_list_of_product_links(self):
+    def create_list_of_product_links(self):
         '''Extracts the product links and appends them to a list'''
         time.sleep(5)
         container = self.driver.find_element(by = By.XPATH, value = '/html/body/div[1]/div[1]/div[3]/div[2]')
@@ -57,11 +59,10 @@ class WaterScraper():
             self.link_list.append(book_link)
             
             
-        print(self.link_list)
 
     def create_dictionary_of_product_data(self):
         '''Extracts all relavent data and loads it into a dictionary'''
-        for product in self.link_list[:3]:
+        for product in self.link_list[:9]:
             self.driver.get(product)
             book_title = self.driver.find_element(by = By.CLASS_NAME, value = 'book-title').text
             author = self.driver.find_element(by = By.XPATH, value = '/html/body/div[1]/div[1]/div[2]/section[1]/div[2]/div[1]/span/a/b/span').text
@@ -79,7 +80,6 @@ class WaterScraper():
             'product_img_link':product_img_link
             }
             self.product_list.append(product_details)
-        print(self.product_list)
 
     def extract_img_and_dwnld(self):
         '''Obtains image link and downloads image locally'''
@@ -103,8 +103,24 @@ class WaterScraper():
         with open('data.json','w') as f:
             json.dump(self.product_list,f)
 
+    def upload_raw_data(self):
+        ACCESS_KEY_ID = 'AKIAXLHS7SZO75HDAKAY'
+        ACCESS_SECRET_KEY ='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' 
+        BUCKET_NAME = 'waterstones-data'
 
+        data=open('data.json','rb')
 
+        s3 = boto3.resource(
+            's3',
+            aws_access_key_id = ACCESS_KEY_ID,
+            aws_secret_access_key = ACCESS_SECRET_KEY,
+            config = Config(signature_version = 's3v4'))
+        s3.Bucket(BUCKET_NAME).put_object(Key = 'data.json', Body = data)
+        print("Done")
+    
+    def make_pandas_dataframe(self):
+        df = pd.DataFrame(self.product_list)
+        print(df)
 
 runscraper = WaterScraper()
 
@@ -112,6 +128,7 @@ if __name__ == '__main__':
     runscraper.geturl()
     runscraper.click_accept_cookies()
     runscraper.nav_to_crime_books()
-    runscraper.extract_product_links()
-    runscraper.extract_and_load_dict()
-    runscraper.load_data_to_json()
+    runscraper.create_list_of_product_links()
+    runscraper.create_dictionary_of_product_data()
+    runscraper.make_pandas_dataframe()
+
