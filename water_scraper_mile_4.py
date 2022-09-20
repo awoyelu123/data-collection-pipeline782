@@ -94,19 +94,19 @@ class WaterScraper():
     def load_data_to_json(self):
         '''Saves dictionary of product text data as a json file'''   
         os.chdir('C:\\Users\\awoye\\OneDrive\\Documents\\GitHub\\data-collection-pipeline782\\raw_data')
-        with open('data.json','w') as f:
+        with open('raw_data\data.json','w') as f:
             json.dump(self.product_list,f)
 
     def upload_raw_data(self):
-        ACCESS_KEY_ID = 'AKIAXLHS7SZO75HDAKAY'
-        ACCESS_SECRET_KEY ='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' 
+        ACCESS_KEY_ID = os.environ['AWS_ACCESS_KEY_ID']
+        ACCESS_SECRET_KEY =os.environ['ACCESS_SECRET_KEY']
         BUCKET_NAME = 'waterstones-data'
 
         data=open('data.json','rb')
 
         s3 = boto3.resource(
             's3',
-            aws_access_key_id = ACCESS_KEY_ID,
+            AWS_ACCESS_KEY_ID = ACCESS_KEY_ID,
             aws_secret_access_key = ACCESS_SECRET_KEY,
             config = Config(signature_version = 's3v4'))
         s3.Bucket(BUCKET_NAME).put_object(Key = 'data.json', Body = data)

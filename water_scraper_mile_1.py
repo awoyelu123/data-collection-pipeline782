@@ -9,6 +9,8 @@ import urllib
 import time
 from uuid import UUID
 JSONEncoder_olddefault = JSONEncoder.default
+
+
 def JSONEncoder_newdefault(self, o):
     if isinstance(o, UUID): return str(o)
     return JSONEncoder_olddefault(self, o)
