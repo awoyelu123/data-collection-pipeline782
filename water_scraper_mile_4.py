@@ -6,6 +6,7 @@ import pandas as pd
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
+from sqlalchemy import create_engine
 import urllib.request
 import time
 import uuid
@@ -57,6 +58,7 @@ class WaterScraper():
         for book in link_container:
             book_link = book.find_element(by = By.TAG_NAME, value = 'a').get_attribute('href')
             self.link_list.append(book_link)
+        print(self.link_list)
             
             
 
@@ -74,6 +76,7 @@ class WaterScraper():
             'product_img_link':self.driver.find_element(by = By.XPATH, value = '//*[@id="scope_book_image"]').get_attribute('src')
             }
             self.product_list.append(product_details)
+    
 
     def extract_img_and_dwnld(self):
         '''Obtains image link and downloads image locally'''
@@ -106,7 +109,7 @@ class WaterScraper():
 
         s3 = boto3.resource(
             's3',
-            AWS_ACCESS_KEY_ID = ACCESS_KEY_ID,
+            aws_access_key_id = ACCESS_KEY_ID,
             aws_secret_access_key = ACCESS_SECRET_KEY,
             config = Config(signature_version = 's3v4'))
         s3.Bucket(BUCKET_NAME).put_object(Key = 'data.json', Body = data)
@@ -115,6 +118,20 @@ class WaterScraper():
     def make_pandas_dataframe(self):
         df = pd.DataFrame(self.product_list)
         print(df)
+    
+    def load_to_sql(self):
+        df = pd.DataFrame(self.product_list)
+        DATABASE_TYPE = 'postgresql'
+        DBAPI = 'psycopg2'
+        HOST = 'database-1.czkh6nyqipgc.eu-west-2.rds.amazonaws.com'
+        USER = 'postgres'
+        PASSWORD = 'password'
+        DATABASE = 'postgres'
+        PORT = 5432
+        engine = create_engine(f"{DATABASE_TYPE}+{DBAPI}://{USER}:{PASSWORD}@{HOST}:{PORT}/{DATABASE}")
+        engine.connect()
+        df.to_sql('waterstones_data', engine,if_exists= 'append')
+        
 
 runscraper = WaterScraper()
 
@@ -125,4 +142,5 @@ if __name__ == '__main__':
     runscraper.create_list_of_product_links()
     runscraper.create_dictionary_of_product_data()
     runscraper.make_pandas_dataframe()
+    runscraper.load_to_sql()
 
