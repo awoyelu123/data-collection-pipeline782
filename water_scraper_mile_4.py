@@ -7,6 +7,7 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from sqlalchemy import create_engine
+from sqlalchemy import inspect
 import urllib.request
 import time
 import uuid
@@ -64,11 +65,11 @@ class WaterScraper():
 
     def create_dictionary_of_product_data(self):
         '''Extracts all relavent data and loads it into a dictionary'''
-        for product in self.link_list[:9]:
+        for product in self.link_list[:12]:
             self.driver.get(product)
         
             product_details ={
-            'ISBN': self.driver.find_element(by = By.XPATH, value = '/html/body/div[1]/div[1]/div[2]/section[2]/div[2]/div[1]/div[1]/p/i[2]/span').text,
+            'isbn': self.driver.find_element(by = By.XPATH, value = '/html/body/div[1]/div[1]/div[2]/section[2]/div[2]/div[1]/div[1]/p/i[2]/span').text,
             'book_title':self.driver.find_element(by = By.CLASS_NAME, value = 'book-title').text,
             'author':self.driver.find_element(by = By.XPATH, value = '/html/body/div[1]/div[1]/div[2]/section[1]/div[2]/div[1]/span/a/b/span').text,
             'price': float(self.driver.find_element(by = By.XPATH, value = '/html/body/div[1]/div[1]/div[2]/section[1]/div[2]/div[2]/div/div/div/div[1]/div/b[2]').text[1:]),
@@ -116,11 +117,9 @@ class WaterScraper():
         print("Done")
     
     def make_pandas_dataframe(self):
-        df = pd.DataFrame(self.product_list)
-        print(df)
+        self.df = pd.DataFrame(self.product_list)
     
     def load_to_sql(self):
-        df = pd.DataFrame(self.product_list)
         DATABASE_TYPE = 'postgresql'
         DBAPI = 'psycopg2'
         HOST = 'database-1.czkh6nyqipgc.eu-west-2.rds.amazonaws.com'
@@ -130,8 +129,15 @@ class WaterScraper():
         PORT = 5432
         engine = create_engine(f"{DATABASE_TYPE}+{DBAPI}://{USER}:{PASSWORD}@{HOST}:{PORT}/{DATABASE}")
         engine.connect()
-        df.to_sql('waterstones_data', engine,if_exists= 'append')
-        
+
+        old_info = pd.read_sql_table('waterstones_data',con = engine)
+        merged_data = pd.concat([old_info, self.df])
+        new_data = merged_data.drop_duplicates(keep=False)
+        new_data.to_sql('waterstones_data',engine,if_exists ='append', index = False)
+
+
+
+
 
 runscraper = WaterScraper()
 
