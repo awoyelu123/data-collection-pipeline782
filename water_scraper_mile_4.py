@@ -65,7 +65,7 @@ class WaterScraper():
 
     def create_dictionary_of_product_data(self):
         '''Extracts all relavent data and loads it into a dictionary'''
-        for product in self.link_list[:12]:
+        for product in self.link_list[:1]:
             self.driver.get(product)
         
             product_details ={
@@ -146,7 +146,5 @@ if __name__ == '__main__':
     runscraper.click_accept_cookies()
     runscraper.nav_to_crime_books()
     runscraper.create_list_of_product_links()
-    runscraper.create_dictionary_of_product_data()
-    runscraper.make_pandas_dataframe()
-    runscraper.load_to_sql()
+
 
