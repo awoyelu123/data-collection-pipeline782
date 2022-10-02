@@ -10,7 +10,6 @@ from sqlalchemy import create_engine
 from sqlalchemy import inspect
 import urllib.request
 import time
-import uuid
 
 
 class WaterScraper():
@@ -65,9 +64,9 @@ class WaterScraper():
 
     def create_dictionary_of_product_data(self):
         '''Extracts all relavent data and loads it into a dictionary'''
-        for product in self.link_list[:1]:
+        for product in self.link_list[:15]:
             self.driver.get(product)
-        
+            time.sleep(2)
             product_details ={
             'isbn': self.driver.find_element(by = By.XPATH, value = '/html/body/div[1]/div[1]/div[2]/section[2]/div[2]/div[1]/div[1]/p/i[2]/span').text,
             'book_title':self.driver.find_element(by = By.CLASS_NAME, value = 'book-title').text,
@@ -146,5 +145,5 @@ if __name__ == '__main__':
     runscraper.click_accept_cookies()
     runscraper.nav_to_crime_books()
     runscraper.create_list_of_product_links()
-
+    runscraper.create_dictionary_of_product_data()
 
