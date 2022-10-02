@@ -17,6 +17,7 @@ class WaterScraper():
         self.link_list = []
         self.product_list =[]
 
+
     def geturl(self):
         '''Opens the waterstones webpage'''
         self.driver = webdriver.Chrome("C:\\Users\\awoye\\Downloads\\chromedriver_win32\\chromedriver.exe")
@@ -29,6 +30,7 @@ class WaterScraper():
         button = self.driver.find_element(by = By.XPATH, value = '//*[@id="onetrust-accept-btn-handler"]')
         button.click()
 
+
     def nav_to_crime_books(self):
         '''Navigates to book where the desired product are found'''
         time.sleep(7)
@@ -39,15 +41,30 @@ class WaterScraper():
         time.sleep(5)
         crime_books_page= self.driver.find_element(by = By.XPATH, value = '//*[@id="pagesmain"]/div/header[1]/a').click()
 
+
+    def extend_webpage(self):
+            self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+            time.sleep(5)
+            self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+            time.sleep(5)
+            self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+            self.driver.find_element(by = By.XPATH, value = '/html/body/div[1]/div[1]/div[3]/div[3]/button').click()
+            time.sleep(3)
+            self.driver.find_element(by = By.XPATH, value = '/html/body/div[1]/div[1]/div[3]/div[3]/button').click()
+            time.sleep(3)
+
+
     def scroll_up(self):       
         '''scrolls to top of page''' 
         self.driver.execute_script("window.scroll(0, 0);")
         time.sleep(5)
             
+
     def scroll_down(self):
         '''Scrolls to the bottom of the page'''
         time.sleep(5)
         self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+
 
     def create_list_of_product_links(self):
         '''Extracts the product links and appends them to a list'''
@@ -61,21 +78,32 @@ class WaterScraper():
         print(self.link_list)
             
             
-
     def create_dictionary_of_product_data(self):
         '''Extracts all relavent data and loads it into a dictionary'''
-        for product in self.link_list[:15]:
+        for product in self.link_list[:50]:
             self.driver.get(product)
-            time.sleep(2)
-            product_details ={
-            'isbn': self.driver.find_element(by = By.XPATH, value = '/html/body/div[1]/div[1]/div[2]/section[2]/div[2]/div[1]/div[1]/p/i[2]/span').text,
-            'book_title':self.driver.find_element(by = By.CLASS_NAME, value = 'book-title').text,
-            'author':self.driver.find_element(by = By.XPATH, value = '/html/body/div[1]/div[1]/div[2]/section[1]/div[2]/div[1]/span/a/b/span').text,
-            'price': float(self.driver.find_element(by = By.XPATH, value = '/html/body/div[1]/div[1]/div[2]/section[1]/div[2]/div[2]/div/div/div/div[1]/div/b[2]').text[1:]),
-            'pages': int(self.driver.find_element(by = By.XPATH, value = '/html/body/div[1]/div[1]/div[2]/section[1]/div[2]/div[2]/div/div/div/div[2]/span[2]/span').text),
-            'product_img_link':self.driver.find_element(by = By.XPATH, value = '//*[@id="scope_book_image"]').get_attribute('src')
-            }
-            self.product_list.append(product_details)
+            try:
+                pages = int(self.driver.find_element(by = By.XPATH, value = '/html/body/div[1]/div[1]/div[2]/section[1]/div[2]/div[2]/div/div/div/div[2]/span[2]/span').text)
+            except Exception:
+                pages = None
+            try:
+                price = float(self.driver.find_element(by = By.XPATH, value = '/html/body/div[1]/div[1]/div[2]/section[1]/div[2]/div[2]/div/div/div/div[1]/div/b[2]').text[1:])
+            except Exception:
+                try: 
+                    price = float(self.driver.find_element(by = By.XPATH, value = '/html/body/div[1]/div[1]/div[2]/section[1]/div[2]/div[2]/div/div/div/div[1]/div/b').text[1:])
+                except Exception:
+                            price = None
+            finally:
+                product_details ={
+                'isbn': self.driver.find_element(by = By.XPATH, value = '/html/body/div[1]/div[1]/div[2]/section[2]/div[2]/div[1]/div[1]/p/i[2]/span').text,
+                'book_title':self.driver.find_element(by = By.CLASS_NAME, value = 'book-title').text,
+                'author':self.driver.find_element(by = By.XPATH, value = '/html/body/div[1]/div[1]/div[2]/section[1]/div[2]/div[1]/span/a/b/span').text,
+                'price': price,
+                'pages': pages,
+                'product_img_link':self.driver.find_element(by = By.XPATH, value = '//*[@id="scope_book_image"]').get_attribute('src')
+                }
+                self.product_list.append(product_details)
+        print(self.product_list)   
     
 
     def extract_img_and_dwnld(self):
@@ -94,11 +122,13 @@ class WaterScraper():
         os.chdir("C:\\Users\\awoye\\OneDrive\\Documents\\GitHub\\data-collection-pipeline782")
         os.mkdir('raw_data')
 
+
     def load_data_to_json(self):
         '''Saves dictionary of product text data as a json file'''   
         os.chdir('C:\\Users\\awoye\\OneDrive\\Documents\\GitHub\\data-collection-pipeline782\\raw_data')
         with open('raw_data\data.json','w') as f:
             json.dump(self.product_list,f)
+
 
     def upload_raw_data(self):
         ACCESS_KEY_ID = os.environ['AWS_ACCESS_KEY_ID']
@@ -115,9 +145,11 @@ class WaterScraper():
         s3.Bucket(BUCKET_NAME).put_object(Key = 'data.json', Body = data)
         print("Done")
     
+
     def make_pandas_dataframe(self):
         self.df = pd.DataFrame(self.product_list)
     
+
     def load_to_sql(self):
         DATABASE_TYPE = 'postgresql'
         DBAPI = 'psycopg2'
@@ -128,15 +160,18 @@ class WaterScraper():
         PORT = 5432
         engine = create_engine(f"{DATABASE_TYPE}+{DBAPI}://{USER}:{PASSWORD}@{HOST}:{PORT}/{DATABASE}")
         engine.connect()
-
-        old_info = pd.read_sql_table('waterstones_data',con = engine)
-        merged_data = pd.concat([old_info, self.df])
-        new_data = merged_data.drop_duplicates(keep=False)
-        new_data.to_sql('waterstones_data',engine,if_exists ='append', index = False)
-
-
-
-
+        try:
+            old_info = pd.read_sql_table('waterstones_data',con = engine)
+            merged_data = pd.concat([old_info, self.df])
+            new_data = merged_data.drop_duplicates(keep=False)
+            new_data.to_sql('waterstones_data',engine,if_exists ='append', index = False)
+        except Exception:
+            self.df.to_sql('waterstones_data',engine,if_exists ='append', index = False)
+        finally:
+            old_info = pd.read_sql_table('waterstones_data',con = engine)
+            merged_data = pd.concat([old_info, self.df])
+            new_data = merged_data.drop_duplicates(keep=False)
+            new_data.to_sql('waterstones_data',engine,if_exists ='append', index = False)
 
 runscraper = WaterScraper()
 
@@ -144,6 +179,9 @@ if __name__ == '__main__':
     runscraper.geturl()
     runscraper.click_accept_cookies()
     runscraper.nav_to_crime_books()
+    runscraper.extend_webpage()
     runscraper.create_list_of_product_links()
     runscraper.create_dictionary_of_product_data()
+    runscraper.make_pandas_dataframe()
+    runscraper.load_to_sql()
 

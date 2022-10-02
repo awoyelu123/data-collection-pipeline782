@@ -65,11 +65,7 @@ runscraper = WaterScraper()
 
 if __name__ == '__main__':
     runscraper.geturl()
-    runscraper.click_accept_cookies()
-    runscraper.nav_to_crime_books()
-    runscraper.scroll_down()
-    runscraper.scroll_up()
-    runscraper.extract_product_links()
+
 
 
 
