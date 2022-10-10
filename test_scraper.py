@@ -1,5 +1,5 @@
 import unittest
-from water_scraper_mile_4 import WaterScraper
+from water_scraper import WaterScraper
 
 
     
@@ -29,7 +29,7 @@ class TestLinkList(unittest.TestCase):
         self.assertEqual(self.link_list[0],'https://www.waterstones.com/book/the-bullet-that-missed/richard-osman/2928377088439')
         self.assertEqual(str(type(self.link_list)),"<class 'list'>")
     
-
+'''
     def testDictList(self):
         from selenium import webdriver
         from selenium.webdriver.common.by import By
@@ -67,7 +67,7 @@ class TestLinkList(unittest.TestCase):
     def testDirectoryExists(self):
         import os
         self.assertTrue(os.path.exists("C:\\Users\\awoye\\OneDrive\\Documents\\GitHub\\data-collection-pipeline782//raw_data"))
-
+'''
 
 
  

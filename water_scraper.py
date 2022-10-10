@@ -6,10 +6,11 @@ import pandas as pd
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.chrome.options import Options
 from sqlalchemy import create_engine
 from sqlalchemy import inspect
-import urllib.request
 import time
+import urllib.request
 
 
 class WaterScraper():
@@ -22,11 +23,25 @@ class WaterScraper():
         '''Opens the waterstones webpage'''
         self.driver = webdriver.Chrome("C:\\Users\\awoye\\Downloads\\chromedriver_win32\\chromedriver.exe")
         self.driver.get("https://www.waterstones.com/")
-        
+    
+    def get_url_headless_mode(self):
+
+        options= Options()
+        options.add_argument('--headless')
+        options.add_argument('window-size=1903x961')
+        user_agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36'
+        options.add_argument(f'user-agent={user_agent}')
+        self.driver = webdriver.Chrome(chrome_options=options, executable_path = "C:\\Users\\awoye\\Downloads\\chromedriver_win32\\chromedriver.exe")
+        self.driver.get("https://www.waterstones.com/")
+        print ("Headless Chrome Initialized on Windows OS")
+
+
+
+
 
     def click_accept_cookies(self):
         '''Waits for accept cookies pop up and then clicks it when it becomes available'''
-        time.sleep(8)
+        time.sleep(10)
         button = self.driver.find_element(by = By.XPATH, value = '//*[@id="onetrust-accept-btn-handler"]')
         button.click()
 
@@ -48,9 +63,9 @@ class WaterScraper():
             self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
             time.sleep(5)
             self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-            self.driver.find_element(by = By.XPATH, value = '/html/body/div[1]/div[1]/div[3]/div[3]/button').click()
+            self.driver.find_element(by = By.XPATH, value = '/html/body/div[1]/div[2]/div[3]/div[3]/button').click()
             time.sleep(3)
-            self.driver.find_element(by = By.XPATH, value = '/html/body/div[1]/div[1]/div[3]/div[3]/button').click()
+            self.driver.find_element(by = By.XPATH, value = '/html/body/div[1]/div[2]/div[3]/div[3]/button').click()
             time.sleep(3)
 
 
@@ -69,7 +84,7 @@ class WaterScraper():
     def create_list_of_product_links(self):
         '''Extracts the product links and appends them to a list'''
         time.sleep(5)
-        container = self.driver.find_element(by = By.XPATH, value = '/html/body/div[1]/div[1]/div[3]/div[2]')
+        container = self.driver.find_element(by = By.XPATH, value = '/html/body/div[1]/div[2]/div[3]/div[2]')
         link_container = container.find_elements(by = By.CLASS_NAME, value = 'title-wrap')
 
         for book in link_container:
@@ -80,24 +95,24 @@ class WaterScraper():
             
     def create_dictionary_of_product_data(self):
         '''Extracts all relavent data and loads it into a dictionary'''
-        for product in self.link_list[:50]:
+        for product in self.link_list[:20]:
             self.driver.get(product)
             try:
-                pages = int(self.driver.find_element(by = By.XPATH, value = '/html/body/div[1]/div[1]/div[2]/section[1]/div[2]/div[2]/div/div/div/div[2]/span[2]/span').text)
+                pages = int(self.driver.find_element(by = By.XPATH, value = '/html/body/div[1]/div[2]/div[2]/section[1]/div[2]/div[2]/div/div/div/div[2]/span[2]/span').text)
             except Exception:
                 pages = None
             try:
-                price = float(self.driver.find_element(by = By.XPATH, value = '/html/body/div[1]/div[1]/div[2]/section[1]/div[2]/div[2]/div/div/div/div[1]/div/b[2]').text[1:])
+                price = float(self.driver.find_element(by = By.XPATH, value = '/html/body/div[1]/div[2]/div[2]/section[1]/div[2]/div[2]/div/div/div/div[1]/div/b[2]').text[1:])
             except Exception:
                 try: 
-                    price = float(self.driver.find_element(by = By.XPATH, value = '/html/body/div[1]/div[1]/div[2]/section[1]/div[2]/div[2]/div/div/div/div[1]/div/b').text[1:])
+                    price = float(self.driver.find_element(by = By.XPATH, value = '/html/body/div[1]/div[2]/div[2]/section[1]/div[2]/div[2]/div/div/div/div[1]/div/b').text[1:])
                 except Exception:
                             price = None
             finally:
                 product_details ={
-                'isbn': self.driver.find_element(by = By.XPATH, value = '/html/body/div[1]/div[1]/div[2]/section[2]/div[2]/div[1]/div[1]/p/i[2]/span').text,
+                'isbn': self.driver.find_element(by = By.XPATH, value = '/html/body/div[1]/div[2]/div[2]/section[2]/div[2]/div[1]/div[1]/p/i[2]/span').text,
                 'book_title':self.driver.find_element(by = By.CLASS_NAME, value = 'book-title').text,
-                'author':self.driver.find_element(by = By.XPATH, value = '/html/body/div[1]/div[1]/div[2]/section[1]/div[2]/div[1]/span/a/b/span').text,
+                'author':self.driver.find_element(by = By.XPATH, value = '/html/body/div[1]/div[2]/div[2]/section[1]/div[2]/div[1]/span/a/b/span').text,
                 'price': price,
                 'pages': pages,
                 'product_img_link':self.driver.find_element(by = By.XPATH, value = '//*[@id="scope_book_image"]').get_attribute('src')
@@ -125,12 +140,15 @@ class WaterScraper():
 
     def load_data_to_json(self):
         '''Saves dictionary of product text data as a json file'''   
-        os.chdir('C:\\Users\\awoye\\OneDrive\\Documents\\GitHub\\data-collection-pipeline782\\raw_data')
-        with open('raw_data\data.json','w') as f:
-            json.dump(self.product_list,f)
+        os.chdir('C:\\Users\\awoye\\OneDrive\Documents\\GitHub\\data-collection-pipeline782\\raw_data')
+        with open('C:\\Users\\awoye\\OneDrive\\Documents\\GitHub\\data-collection-pipeline782\\raw_data\\data.json','w') as f:
+            json.dump(self.product_list,f) 
 
 
     def upload_raw_data(self):
+        '''
+        Uploads raw data to S3
+        '''
         ACCESS_KEY_ID = os.environ['AWS_ACCESS_KEY_ID']
         ACCESS_SECRET_KEY =os.environ['ACCESS_SECRET_KEY']
         BUCKET_NAME = 'waterstones-data'
@@ -151,6 +169,9 @@ class WaterScraper():
     
 
     def load_to_sql(self):
+        '''
+        Loads dataframe into PostgresSQl
+        '''
         DATABASE_TYPE = 'postgresql'
         DBAPI = 'psycopg2'
         HOST = 'database-1.czkh6nyqipgc.eu-west-2.rds.amazonaws.com'
@@ -176,12 +197,12 @@ class WaterScraper():
 runscraper = WaterScraper()
 
 if __name__ == '__main__':
-    runscraper.geturl()
+    runscraper.get_url_headless_mode()
     runscraper.click_accept_cookies()
     runscraper.nav_to_crime_books()
     runscraper.extend_webpage()
     runscraper.create_list_of_product_links()
     runscraper.create_dictionary_of_product_data()
-    runscraper.make_pandas_dataframe()
-    runscraper.load_to_sql()
+
+    
 
