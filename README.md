@@ -1,11 +1,16 @@
 # data-collection-pipeline782
 Brief Description of the project
+
+
 In this project I scrape Waterstones.com to obtain information of my favourite genre of books (crime) and used various technologies to make my data accessible in multiple forms. These include converting my dictioary to JSON which could then be uploaded to S3 and converted my dictionary into a pandas dataframe that could be loaded into my RDS cloud SQL database. With the use of Docker I containerised my scraper to allow me to ....
 
 Milestone 1 
+
 -Why did I choose waterstones? 
 
 Milestone
+
+
 Created Scraper class
 I began my project by creating my Scraper class that I named "WaterScraper" and then began to add methods so I could initialise an instance of the class and use it to scrape the Waterstones website.
 
