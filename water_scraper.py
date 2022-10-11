@@ -95,7 +95,7 @@ class WaterScraper():
             
     def create_dictionary_of_product_data(self):
         '''Extracts all relavent data and loads it into a dictionary'''
-        for product in self.link_list[:20]:
+        for product in self.link_list[:1]:
             self.driver.get(product)
             try:
                 pages = int(self.driver.find_element(by = By.XPATH, value = '/html/body/div[1]/div[2]/div[2]/section[1]/div[2]/div[2]/div/div/div/div[2]/span[2]/span').text)
@@ -125,7 +125,7 @@ class WaterScraper():
         '''Obtains image link and downloads image locally'''
         for product in self.link_list[:1]:
             self.driver.get(product)
-            id = self.driver.find_element(by = By.XPATH, value = '/html/body/div[1]/div[1]/div[2]/section[2]/div[2]/div[1]/div[1]/p/i[2]/span').text
+            id = self.driver.find_element(by = By.XPATH, value = '/html/body/div[1]/div[2]/div[2]/section[2]/div[2]/div[1]/div[1]/p/i[2]/span').text
             img_link = self.driver.find_element(by = By.XPATH, value = '//*[@id="scope_book_image"]').get_attribute('src')
             filename = id + '.jpg'
             image_url = img_link
@@ -202,7 +202,7 @@ if __name__ == '__main__':
     runscraper.nav_to_crime_books()
     runscraper.extend_webpage()
     runscraper.create_list_of_product_links()
-    runscraper.create_dictionary_of_product_data()
+    #runscraper.create_dictionary_of_product_data()
 
     
 
