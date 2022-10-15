@@ -21,7 +21,7 @@ class WaterScraper():
 
     def geturl(self):
         '''Opens the waterstones webpage'''
-        self.driver = webdriver.Chrome("C:\\Users\\awoye\\Downloads\\chromedriver_win32\\chromedriver.exe")
+        self.driver = webdriver.Chrome("C:\\Users\\awoye\\Downloads\\chromedriver_win32 (2)\\chromedriver.exe")
         self.driver.get("https://www.waterstones.com/")
     
     def get_url_headless_mode(self):
@@ -172,6 +172,7 @@ class WaterScraper():
         '''
         Loads dataframe into PostgresSQl
         '''
+        print("Connecting to database")
         DATABASE_TYPE = 'postgresql'
         DBAPI = 'psycopg2'
         HOST = 'database-1.czkh6nyqipgc.eu-west-2.rds.amazonaws.com'
@@ -197,12 +198,12 @@ class WaterScraper():
 runscraper = WaterScraper()
 
 if __name__ == '__main__':
-    runscraper.get_url_headless_mode()
+    runscraper.geturl()
     runscraper.click_accept_cookies()
     runscraper.nav_to_crime_books()
     runscraper.extend_webpage()
     runscraper.create_list_of_product_links()
-    #runscraper.create_dictionary_of_product_data()
+    runscraper.create_dictionary_of_product_data()
 
     
 
