@@ -3,3 +3,7 @@ webdriver_manager
 pandas
 sqlalchemy
 psycopg2-binary
+boto3
+pytest==2.9.1
+chromedriver-autoinstaller
+packaging

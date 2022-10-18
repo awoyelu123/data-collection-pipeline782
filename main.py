@@ -4,6 +4,7 @@ import json
 import os
 import pandas as pd
 from selenium import webdriver
+from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.chrome.options import Options
@@ -11,13 +12,14 @@ from sqlalchemy import create_engine
 from sqlalchemy import inspect
 import time
 import urllib.request
+import chromedriver_autoinstaller
 
 
 class WaterScraper():
     def __init__(self):
         self.link_list = []
         self.product_list =[]
-
+        
 
     def geturl(self):
         '''Opens the waterstones webpage'''
@@ -29,9 +31,17 @@ class WaterScraper():
         options= Options()
         options.add_argument('--headless')
         options.add_argument('window-size=1903x961')
+        options.add_argument("--no-sandbox") 
+        options.add_argument("--headless")
+        options.add_argument("--disable-dev-shm-usage")
+        options.add_argument("--disable-setuid-sandbox") 
+        options.add_argument('--disable-gpu')
+        chrome_prefs = {}
+        options.experimental_options["prefs"] = chrome_prefs
+        chrome_prefs["profile.default_content_settings"] = {"images": 2}
         user_agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36'
         options.add_argument(f'user-agent={user_agent}')
-        self.driver = webdriver.Chrome(chrome_options=options, executable_path = "C:\\Users\\awoye\\Downloads\\chromedriver_win32 (2)\\chromedriver.exe")
+        self.driver = webdriver.Chrome(chrome_options=options)
         self.driver.get("https://www.waterstones.com/")
         print ("Headless Chrome Initialized on Windows OS")
 
@@ -58,15 +68,12 @@ class WaterScraper():
 
 
     def extend_webpage(self):
-            self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-            time.sleep(5)
-            self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-            time.sleep(5)
-            self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-            self.driver.find_element(by = By.XPATH, value = '/html/body/div[1]/div[2]/div[3]/div[3]/button').click()
-            time.sleep(3)
-            self.driver.find_element(by = By.XPATH, value = '/html/body/div[1]/div[2]/div[3]/div[3]/button').click()
-            time.sleep(3)
+        self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+        time.sleep(5)
+        self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+        time.sleep(5)
+        self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+
 
 
     def scroll_up(self):       
