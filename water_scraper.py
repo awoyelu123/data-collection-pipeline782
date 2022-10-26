@@ -54,19 +54,16 @@ class WaterScraper():
         time.sleep(5)
         crime_page = self.driver.find_element(by = By.XPATH, value = '//*[@id="masthead"]/div[3]/div/div/div/nav/div[1]/ul[2]/li[2]/div/div[1]/div[2]/div/div/span/a').click()
         time.sleep(5)
-        crime_books_page= self.driver.find_element(by = By.XPATH, value = '//*[@id="pagesmain"]/div/header[1]/a').click()
+        self.driver.find_element(by = By.XPATH, value = '//*[@id="pagesmain"]/div/header[1]/a').click()
 
 
     def extend_webpage(self):
             self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-            time.sleep(5)
+            time.sleep(2)
             self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-            time.sleep(5)
+            time.sleep(2)
             self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-            self.driver.find_element(by = By.XPATH, value = '/html/body/div[1]/div[2]/div[3]/div[3]/button').click()
-            time.sleep(3)
-            self.driver.find_element(by = By.XPATH, value = '/html/body/div[1]/div[2]/div[3]/div[3]/button').click()
-            time.sleep(3)
+
 
 
     def scroll_up(self):       
@@ -95,7 +92,7 @@ class WaterScraper():
             
     def create_dictionary_of_product_data(self):
         '''Extracts all relavent data and loads it into a dictionary'''
-        for product in self.link_list[:1]:
+        for product in self.link_list:
             self.driver.get(product)
             try:
                 pages = int(self.driver.find_element(by = By.XPATH, value = '/html/body/div[1]/div[2]/div[2]/section[1]/div[2]/div[2]/div/div/div/div[2]/span[2]/span').text)
@@ -135,7 +132,10 @@ class WaterScraper():
     def create_directory(self):
         '''Creates directory'''
         os.chdir("C:\\Users\\awoye\\OneDrive\\Documents\\GitHub\\data-collection-pipeline782")
-        os.mkdir('raw_data')
+        try:
+            os.mkdir('raw_data')
+        except:
+            pass
 
 
     def load_data_to_json(self):
@@ -161,7 +161,7 @@ class WaterScraper():
             aws_secret_access_key = ACCESS_SECRET_KEY,
             config = Config(signature_version = 's3v4'))
         s3.Bucket(BUCKET_NAME).put_object(Key = 'data.json', Body = data)
-        print("Done")
+        print("Data sent to S3!")
     
 
     def make_pandas_dataframe(self):
@@ -177,7 +177,7 @@ class WaterScraper():
         DBAPI = 'psycopg2'
         HOST = 'database-1.czkh6nyqipgc.eu-west-2.rds.amazonaws.com'
         USER = 'postgres'
-        PASSWORD = 'password'
+        PASSWORD = PASSWORD
         DATABASE = 'postgres'
         PORT = 5432
         engine = create_engine(f"{DATABASE_TYPE}+{DBAPI}://{USER}:{PASSWORD}@{HOST}:{PORT}/{DATABASE}")
@@ -195,15 +195,19 @@ class WaterScraper():
             new_data = merged_data.drop_duplicates(keep=False)
             new_data.to_sql('waterstones_data',engine,if_exists ='append', index = False)
 
+
 runscraper = WaterScraper()
 
+
 if __name__ == '__main__':
-    runscraper.get_url_headless_mode()
+    runscraper.geturl()
     runscraper.click_accept_cookies()
     runscraper.nav_to_crime_books()
     runscraper.extend_webpage()
     runscraper.create_list_of_product_links()
     runscraper.create_dictionary_of_product_data()
+    runscraper.load_data_to_json()
+    runscraper.upload_raw_data()
 
     
 
