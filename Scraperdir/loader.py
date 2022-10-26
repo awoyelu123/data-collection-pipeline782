@@ -1,36 +1,32 @@
-import boto3
-from botocore.client import Config
-import json
 import os
-import pandas as pd
-from selenium import webdriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.chrome.options import Options
+import json
+import boto3
+from botocore.client import Config 
 from sqlalchemy import create_engine
 from sqlalchemy import inspect
-import time
-import urllib.request
+import pandas as pd
 
 
-class Loader():
+class Loader:
+    
     def __init__(self):
-        self.link_list = []
-        self.product_list =[]
+        pass
+
     def create_directory(self):
         '''Creates directory'''
-        os.chdir("C:\\Users\\awoye\\OneDrive\\Documents\\GitHub\\data-collection-pipeline782")
+        self.currentdir = os.getcwd() 
+        os.chdir(self.currentdir)
         try:
             os.mkdir('raw_data')
         except:
             pass
 
-
     def load_data_to_json(self):
-        '''Saves dictionary of product text data as a json file'''   
-        os.chdir('C:\\Users\\awoye\\OneDrive\Documents\\GitHub\\data-collection-pipeline782\\raw_data')
-        with open('C:\\Users\\awoye\\OneDrive\\Documents\\GitHub\\data-collection-pipeline782\\raw_data\\data.json','w') as f:
-            json.dump(self.product_list,f) 
+        '''Saves dictionary of product text data as a json file'''  
+
+        os.chdir(self.currentdir + 'raw_data')
+        with open(self.currentdir + 'raw_data' + 'data.json','w') as f:
+            json.dump(self.product_list,f)
 
 
     def upload_raw_data(self):
@@ -58,7 +54,8 @@ class Loader():
 
     def load_to_sql(self):
         '''
-        Loads dataframe into PostgresSQl
+        Connects to AWS RDS using sqlalchemy.
+        Loads dataframe into PostgresSQl.
         '''
         print("Connecting to database")
         DATABASE_TYPE = 'postgresql'

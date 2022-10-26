@@ -1,19 +1,14 @@
-import boto3
-from botocore.client import Config
-import json
-import os
-import pandas as pd
 from selenium import webdriver
+from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
+from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.chrome.options import Options
-from sqlalchemy import create_engine
-from sqlalchemy import inspect
 import time
-import urllib.request
 
-
-class WaterScraper():
+class Scraper():
     def __init__(self):
         self.link_list = []
         self.product_list =[]
@@ -21,6 +16,7 @@ class WaterScraper():
 
     def geturl(self):
         '''Opens the waterstones webpage'''
+        print("Opening url")
         self.driver = webdriver.Chrome("C:\\Users\\awoye\\Downloads\\chromedriver_win32 (2)\\chromedriver.exe")
         self.driver.get("https://www.waterstones.com/")
     
@@ -29,9 +25,17 @@ class WaterScraper():
         options= Options()
         options.add_argument('--headless')
         options.add_argument('window-size=1903x961')
+        options.add_argument("--no-sandbox") 
+        options.add_argument("--headless")
+        options.add_argument("--disable-dev-shm-usage")
+        options.add_argument("--disable-setuid-sandbox") 
+        options.add_argument('--disable-gpu')
+        chrome_prefs = {}
+        options.experimental_options["prefs"] = chrome_prefs
+        chrome_prefs["profile.default_content_settings"] = {"images": 2}
         user_agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36'
         options.add_argument(f'user-agent={user_agent}')
-        self.driver = webdriver.Chrome(chrome_options=options, executable_path = "C:\\Users\\awoye\\Downloads\\chromedriver_win32 (2)\\chromedriver.exe")
+        self.driver = webdriver.Chrome(chrome_options=options)
         self.driver.get("https://www.waterstones.com/")
         print ("Headless Chrome Initialized on Windows OS")
 
@@ -44,6 +48,7 @@ class WaterScraper():
         time.sleep(10)
         button = self.driver.find_element(by = By.XPATH, value = '//*[@id="onetrust-accept-btn-handler"]')
         button.click()
+        print("Cookie clicked successfully")
 
 
     def nav_to_crime_books(self):
@@ -88,7 +93,7 @@ class WaterScraper():
             book_link = book.find_element(by = By.TAG_NAME, value = 'a').get_attribute('href')
             self.link_list.append(book_link)
         print(self.link_list)
-            
+        return self.link_list
             
     def create_dictionary_of_product_data(self):
         '''Extracts all relavent data and loads it into a dictionary'''
@@ -115,4 +120,6 @@ class WaterScraper():
                 'product_img_link':self.driver.find_element(by = By.XPATH, value = '//*[@id="scope_book_image"]').get_attribute('src')
                 }
                 self.product_list.append(product_details)
-        print(self.product_list)   
+        print(self.product_list)
+        return self.product_list
+
