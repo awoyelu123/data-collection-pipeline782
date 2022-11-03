@@ -49,6 +49,7 @@ class Loader:
     
 
     def make_pandas_dataframe(self):
+        '''Converts all product data into pandas dataframe'''
         self.df = pd.DataFrame(self.product_list)
     
 
